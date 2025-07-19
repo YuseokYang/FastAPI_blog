@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
 
 from database.orm import Post, Comment
 
@@ -8,7 +8,7 @@ from database.orm import Post, Comment
 class SignUpResponse(BaseModel):
     id: Annotated[int, Field()]
     username: Annotated[str, Field()]
-    email: Annotated[str, Field()]
+    email: Annotated[EmailStr | None, Field()]
 
     model_config = ConfigDict(from_attributes=True)
 

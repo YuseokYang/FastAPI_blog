@@ -67,3 +67,17 @@ async def delete_post(
     await post_repo.delete_post(post_id)
 
     return {"message": "Post deleted successfully"}
+
+
+@router.get("/{post_id}", response_model=PostResponse)
+async def get_post_by_id(
+        post_id: int,
+        post_repo: Annotated[PostRepository,Depends()]
+):
+    post = await post_repo.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post Not Found")
+    return PostResponse.from_orm(post)
+
+
+

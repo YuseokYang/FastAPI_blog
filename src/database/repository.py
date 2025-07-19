@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from database.connection import get_db
 from database.orm import User, Post, Comment
@@ -31,19 +31,19 @@ class PostRepository:
         self.session = session
 
     async def get_posts(self):
-        stmt = select(Post).options(joinedload(Post.author))
+        stmt = select(Post).options(selectinload(Post.author))
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
     async def get_post_by_id(self, post_id):
-        stmt = select(Post).options(joinedload(Post.author)).where(Post.id == post_id)
+        stmt = select(Post).options(selectinload(Post.author)).where(Post.id == post_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def create_post(self, post:Post):
         self.session.add(post)
         await self.session.commit()
-        stmt = select(Post).options(joinedload(Post.author)).where(Post.id==post.id)
+        stmt = select(Post).options(selectinload(Post.author)).where(Post.id==post.id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
@@ -58,7 +58,7 @@ class PostRepository:
 
         self.session.add(post)
         await self.session.commit()
-        stmt = select(Post).options(joinedload(Post.author)).where(Post.id==post.id)
+        stmt = select(Post).options(selectinload(Post.author)).where(Post.id==post.id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
@@ -79,12 +79,12 @@ class CommentRepository:
         self.session.add(comment)
         await self.session.commit()
 
-        stmt = select(Comment).options(joinedload(Comment.user)).where(Comment.id==comment.id)
+        stmt = select(Comment).options(selectinload(Comment.user)).where(Comment.id==comment.id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
-    async def get_comment_by_id(self, comment_id):
-        stmt = select(Comment).options(joinedload(Comment.user)).where(Comment.id==comment_id)
+    async def get_comment_by_comment_id(self, comment_id):
+        stmt = select(Comment).options(selectinload(Comment.user)).where(Comment.id==comment_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -92,7 +92,7 @@ class CommentRepository:
         self.session.add(comment)
         await self.session.commit()
 
-        stmt = select(Comment).options(joinedload(Comment.user)).where(Comment.id==comment.id)
+        stmt = select(Comment).options(selectinload(Comment.user)).where(Comment.id==comment.id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -101,3 +101,8 @@ class CommentRepository:
         await self.session.commit()
         return
 
+
+    async def get_comments_by_post_id(self, post_id: int) -> list[Comment]:
+        stmt = select(Comment).options(selectinload(Comment.user)).where(Comment.post_id == post_id).order_by(Comment.id.desc())
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
