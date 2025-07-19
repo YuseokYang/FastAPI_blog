@@ -68,7 +68,7 @@ def run_migrations_online() -> None:
         )
         with context.begin_transaction():
             context.run_migrations()
-
+#
 # ==== 5. 모드에 따라 실행 분기 ====
 
 if context.is_offline_mode():
