@@ -8,7 +8,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://chuteol.netlify.app/",
+    "https://chuteol.netlify.app",
     # "https://fastapi-blog-j1cs.onrender.com",   # 필요하다면 백엔드 자신을 적어도 무방
     # "https://your-frontend.vercel.app",         # 추후 프론트 배포 주소
 ]
