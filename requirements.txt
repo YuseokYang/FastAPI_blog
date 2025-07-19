@@ -1,0 +1,33 @@
+# FastAPI 및 ASGI 서버
+fastapi
+uvicorn[standard]
+
+# DB 연결 및 ORM
+sqlalchemy>=2.0
+pymysql  # MySQL 연결용
+aiomysql
+# 데이터 검증 및 암호화
+pydantic
+passlib[bcrypt]        # 비밀번호 해시
+python-jose[cryptography]  # JWT 발급/검증
+
+# DB 마이그레이션
+alembic
+
+# 환경 변수 설정
+python-dotenv
+
+# 타입 체크 (선택)
+types-python-jose
+types-passlib
+
+# API 테스트
+httpx
+pytest
+
+# CORS 허용 (프론트엔드 연동시 필요)
+fastapi[all]  # optional: includes starlette-cors, staticfiles 등
+
+# 코드 포맷팅 및 린팅 (선택)
+black
+
