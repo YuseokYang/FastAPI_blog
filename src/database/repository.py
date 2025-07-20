@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import select, update
+from sqlalchemy import select, update, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -31,7 +31,11 @@ class PostRepository:
         self.session = session
 
     async def get_posts(self):
-        stmt = select(Post).options(selectinload(Post.author))
+        stmt = (
+            select(Post)
+            .options(selectinload(Post.author))
+            .order_by(desc(Post.is_pinned), desc(Post.id))
+        )
         result = await self.session.execute(stmt)
         return result.scalars().all()
 

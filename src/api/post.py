@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.connection import get_db
@@ -78,6 +78,25 @@ async def get_post_by_id(
     if not post:
         raise HTTPException(status_code=404, detail="Post Not Found")
     return PostResponse.from_orm(post)
+
+
+@router.patch("/{post_id}/pin")
+async def pin_post(
+        post_id: int,
+        is_pinned: Annotated[bool, Body(..., embed=True)],
+        post_repo: Annotated[PostRepository, Depends()],
+        current_user: Annotated[User, Depends(get_current_user)],
+):
+    if not current_user.admin:
+        raise HTTPException(status_code=403, detail="관리자만 공지글을 설정할 수 있습니다.")
+
+    post = await post_repo.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post Not Found")
+
+    post.pinned() if is_pinned else post.unpinned()
+    await post_repo.update_post(post)
+    return {"message": "공지글 상태가 변경되었습니다."}
 
 
 

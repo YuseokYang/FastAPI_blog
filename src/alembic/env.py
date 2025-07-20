@@ -5,39 +5,41 @@ import os
 import sys
 from pathlib import Path
 
-# ==== 1. 경로 설정 및 .env 로드 ====
+# ==== 1. 경로 설정 및 .env.dev / .env.prod 분기 ====
 
-# 프로젝트 루트 기준: blog/.env
 ROOT_DIR = Path(__file__).resolve().parents[2]
-ENV_PATH = ROOT_DIR / ".env"
+
+# ENV 값에 따라 분기 (기본은 dev)
+ENV_MODE = os.getenv("ENV", "dev")  # 환경변수 ENV가 없으면 "dev"로 기본값 설정
+ENV_FILE = ".env.prod" if ENV_MODE == "prod" else ".env.dev"
+ENV_PATH = ROOT_DIR / ENV_FILE
 
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=ENV_PATH)
 
-# DATABASE_URL 환경변수 불러오기
+# ✅ Alembic은 비동기용 DATABASE_URL이 아닌, 동기용 ALEMBIC_DATABASE_URL 사용
 DATABASE_URL = os.getenv("ALEMBIC_DATABASE_URL")
 if not DATABASE_URL:
-    raise ValueError(f"❌ DATABASE_URL not found in {ENV_PATH}")
+    raise ValueError(f"❌ ALEMBIC_DATABASE_URL not found in {ENV_FILE}")
 
-# ==== 2. sys.path 설정 및 Base 불러오기 ====
+# ==== 2. src 폴더 및 Base metadata 설정 ====
 
-# src 폴더를 sys.path에 추가 (FastAPI app 경로)
 SRC_PATH = str(ROOT_DIR / "src")
 sys.path.append(SRC_PATH)
 
-# models에 정의된 Base metadata import
-from database.orm import Base  # e.g., src/database/orm.py
+from database.orm import Base  # Base.metadata를 불러오기 위한 경로
+from database.orm import User
+from database.orm import Post
+from database.orm import Comment
 
-# ==== 3. Alembic config 설정 ====
+# ==== 3. Alembic 설정 ====
 
 config = context.config
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-# 로그 설정
 if config.config_file_name:
     fileConfig(config.config_file_name)
 
-# metadata 설정
 target_metadata = Base.metadata
 
 # ==== 4. 마이그레이션 실행 함수 ====
@@ -68,8 +70,8 @@ def run_migrations_online() -> None:
         )
         with context.begin_transaction():
             context.run_migrations()
-#
-# ==== 5. 모드에 따라 실행 분기 ====
+
+# ==== 5. 실행 ====
 
 if context.is_offline_mode():
     run_migrations_offline()

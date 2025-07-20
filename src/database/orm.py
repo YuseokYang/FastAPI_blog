@@ -1,5 +1,6 @@
+from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
 
 
@@ -12,7 +13,7 @@ class User(Base):
     username: str = Column(String(30), unique=True, nullable=False)
     hashed_password = Column(String(128), nullable=False)
     email: str | None = Column(String(255), nullable=True)
-
+    admin = Column(Boolean, default=False)
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="user", cascade="all, delete")
 
@@ -32,7 +33,8 @@ class Post(Base):
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-
+    created_at = Column(DateTime, default = datetime.now(timezone.utc))
+    is_pinned = Column(Boolean, default=False)
     author = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post", cascade="all, delete")
 
@@ -43,6 +45,13 @@ class Post(Base):
             content=post_data.content,
             user_id=user_id
         )
+
+    def pinned(self):
+        self.is_pinned=True
+
+    def unpinned(self):
+        self.is_pinned=False
+
 
 class Comment(Base):
     __tablename__ = "comments"

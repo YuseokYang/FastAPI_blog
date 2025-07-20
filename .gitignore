@@ -5,6 +5,8 @@ __pycache__/
 # 가상환경, 환경변수
 .venv/
 .env
+.env.dev
+.env.prod
 #####
 # IDE, 시스템
 .idea/
