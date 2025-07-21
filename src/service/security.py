@@ -46,10 +46,11 @@ async def get_current_user(
 
 
 
-def create_JWT(username: str) -> str:
+def create_JWT(username: str, admin: bool) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE_MINUTES))
     payload = {
         "sub": username,
+        "admin": admin,  # 👈 관리자 여부 포함
         "exp": expire
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)

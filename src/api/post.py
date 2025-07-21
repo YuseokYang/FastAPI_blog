@@ -95,7 +95,7 @@ async def pin_post(
         raise HTTPException(status_code=404, detail="Post Not Found")
 
     post.pinned() if is_pinned else post.unpinned()
-    await post_repo.update_post(post)
+    await post_repo.save_post(post)
     return {"message": "공지글 상태가 변경되었습니다."}
 
 

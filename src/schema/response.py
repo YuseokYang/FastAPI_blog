@@ -22,6 +22,7 @@ class PostResponse(BaseModel):
     username: str
     title: str
     content: str
+    is_pinned: bool  # ✅ 추가
 
     @classmethod
     def from_orm(cls, post: Post):
@@ -29,7 +30,8 @@ class PostResponse(BaseModel):
             id=post.id,
             title=post.title,
             content=post.content,
-            username=post.author.username
+            username=post.author.username,
+            is_pinned=post.is_pinned,  # ✅ 추가
         )
 
     model_config = ConfigDict(from_attributes=True)

@@ -66,6 +66,11 @@ class PostRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
+    async def save_post(self, post: Post):  # ✅ pinned 상태만 바꿀 때 사용
+        self.session.add(post)
+        await self.session.commit()
+        await self.session.refresh(post)
+
 
 
     async def delete_post(self, post_id: int):

@@ -49,5 +49,5 @@ async def user_sign_in(
     if (user is None) or (not user_service.verify_password(request.password, user.hashed_password)):
         raise HTTPException(status_code=401, detail="Not Authorized")
 
-    token = create_JWT(request.username)
+    token = create_JWT(request.username, user.admin)
     return SignInResponse(token=token)
