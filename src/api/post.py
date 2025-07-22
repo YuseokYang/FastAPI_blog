@@ -1,6 +1,8 @@
+import os
+import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, UploadFile, File, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.connection import get_db
@@ -8,6 +10,7 @@ from database.orm import User, Post
 from database.repository import PostRepository
 from schema.request import CreatePostRequest
 from schema.response import PostResponse
+from service.file import upload_file
 from service.security import get_current_user
 
 router = APIRouter(prefix="/posts")
@@ -97,6 +100,24 @@ async def pin_post(
     post.pinned() if is_pinned else post.unpinned()
     await post_repo.save_post(post)
     return {"message": "공지글 상태가 변경되었습니다."}
+
+
+
+
+
+@router.post("/upload/image")
+async def upload_image(
+    file: Annotated[UploadFile, File(...)],
+    request: Request  # 👉 요청 정보 포함
+):
+    url_data = await upload_file(file)
+
+    # "url": "/static/uploads/xxx.jpg" 형식으로 리턴된 값을 절대 URL로 변경
+    relative_url = url_data["url"]
+    base_url = str(request.base_url).rstrip("/")  # 예: http://localhost:8000
+    absolute_url = f"{base_url}{relative_url}"
+
+    return {"url": absolute_url}
 
 
 
