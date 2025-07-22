@@ -2,6 +2,8 @@ import os
 import uuid
 from typing import Annotated
 
+import cloudinary
+import cloudinary.uploader  # ✅ 이 줄이 필요함!
 from fastapi import APIRouter, Depends, HTTPException, Body, UploadFile, File, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -107,17 +109,14 @@ async def pin_post(
 
 @router.post("/upload/image")
 async def upload_image(
-    file: Annotated[UploadFile, File(...)],
-    request: Request  # 👉 요청 정보 포함
+    file: Annotated[UploadFile, File(...)]
 ):
-    url_data = await upload_file(file)
-
-    # "url": "/static/uploads/xxx.jpg" 형식으로 리턴된 값을 절대 URL로 변경
-    relative_url = url_data["url"]
-    base_url = str(request.base_url).rstrip("/")  # 예: http://localhost:8000
-    absolute_url = f"{base_url}{relative_url}"
-
-    return {"url": absolute_url}
+    try:
+        result = cloudinary.uploader.upload(file.file)
+        # ✅ Cloudinary에서 제공하는 절대 URL만 그대로 반환
+        return {"url": result["secure_url"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Cloudinary 업로드 실패")
 
 
 

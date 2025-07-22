@@ -31,3 +31,5 @@ fastapi[all]  # optional: includes starlette-cors, staticfiles 등
 # 코드 포맷팅 및 린팅 (선택)
 black
 
+
+cloudinary
